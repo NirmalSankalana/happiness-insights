@@ -3,10 +3,11 @@ from streamlit_folium import st_folium
 import pandas as pd
 import folium
 import geopandas as gpd
+import altair as alt
 
 APP_TITLE = "World Happiness Data"
-GEOJSON_FILE = "./data/countries.geojson"
-DATA_FILE = "./data/data.csv"
+GEOJSON_FILE = "data/countries.geo.json"
+DATA_FILE = "data/data.csv"
 
 
 @st.cache_resource
@@ -53,6 +54,26 @@ def display_map(year, region, start, end, _geo_data, data):
     return country, happiness_rank, happiness_score
 
 
+@st.cache_resource
+def display_past_data(df, country):
+    df = df.loc[df["Country"] == country]
+    df['Year'] = df['Year'].astype(int)
+    
+    chart = alt.Chart(df).mark_line(point=True).encode(
+        x=alt.X('Year:O', axis=alt.Axis(format='d', labelFlush=False)),
+        y='Happiness Score',
+        tooltip=['Year:O', 'Happiness Rank']
+    ).properties(
+        width=alt.Step(80)  # Adjust the width as needed
+    ).configure_view(
+        stroke=None
+    ).configure_axis(
+        grid=False
+    )
+    
+    st.altair_chart(chart, use_container_width=True)
+
+
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale):
     x_map = 17.51
@@ -67,7 +88,7 @@ def display_base_map(_geo_data, df, myscale):
         name='Choropleth',
         data=df,
         columns=['Country', 'Happiness Score'],
-        key_on="feature.properties.ADMIN",
+        key_on="feature.properties.name",
         fill_color='YlGnBu',
         threshold_scale=myscale,
         fill_opacity=1,
@@ -88,7 +109,7 @@ def display_base_map(_geo_data, df, myscale):
 
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
-        country = feature["properties"]['ADMIN']
+        country = feature["properties"]['name']
         feature['properties']['happiness_score'] = df_indexed.loc[country,
                                                                   'Happiness Score'] if country in list(df_indexed.index) else 'N/A'
         feature['properties']['happiness_rank'] = int(
@@ -100,7 +121,7 @@ def display_base_map(_geo_data, df, myscale):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['ADMIN', 'happiness_rank', 'happiness_score'],
+            fields=['name', 'happiness_rank', 'happiness_score'],
             aliases=['Country: ', 'Happiness Rank', 'Happiness Score'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
@@ -150,6 +171,8 @@ def main():
         st.metric("Happiness Rank: ", f"{happiness_rank}")
     with col3:
         st.metric("Happiness Score: ", f"{happiness_score}")
+
+    display_past_data(data, country)
 
 
 if __name__ == "__main__":
