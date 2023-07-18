@@ -31,11 +31,16 @@ def filter_data(df, year, region, start, end):
                          (df['Happiness Score'] <= end)]
     if region and region != "":
         filtered_df = filtered_df.loc[filtered_df['Region'] == region]
+        
     return filtered_df
 
 
 def display_map(year, region, start, end, _geo_data, data):
     df = filter_data(data, year, region, start, end)
+    if df.empty:
+        st.warning("No data available for the selected filters.")
+        return "", "", ""
+    
     myscale = get_scale(df)
     map = display_base_map(_geo_data, df, myscale)
     st_map = st_folium(map, width=700, height=450)
@@ -44,7 +49,7 @@ def display_map(year, region, start, end, _geo_data, data):
     happiness_score = ''
     if st_map['last_active_drawing']:
         properties = st_map['last_active_drawing']['properties']
-        country = properties.get('ADMIN', '')
+        country = properties.get('name', '')
         happiness_score = properties.get('happiness_score', '')
         happiness_rank = properties.get('happiness_rank', '')
     else:
@@ -56,7 +61,7 @@ def display_map(year, region, start, end, _geo_data, data):
 
 @st.cache_resource
 def display_past_data(df, country):
-    df = df.loc[df["Country"] == country]
+    df = df.loc[df["Country"] == country].copy()  # Create a copy of the DataFrame
     df['Year'] = df['Year'].astype(int)
     
     chart = alt.Chart(df).mark_line(point=True).encode(
@@ -158,8 +163,8 @@ def main():
                                          'Western Europe'))
     with col3:
         start, end = st.select_slider('Range',
-                                      options=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9),
-                                      value=(0, 9))
+                                      options=(1, 2, 3, 4, 5, 6, 7, 8),
+                                      value=(1, 8))
 
     geo_data, data = load_data()
     country, happiness_rank, happiness_score = display_map(
@@ -172,7 +177,8 @@ def main():
     with col3:
         st.metric("Happiness Score: ", f"{happiness_score}")
 
-    display_past_data(data, country)
+    if country:
+        display_past_data(data, country)
 
 
 if __name__ == "__main__":
