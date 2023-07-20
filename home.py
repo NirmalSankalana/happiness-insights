@@ -55,7 +55,7 @@ def display_map(year, region, start, end, _geo_data, data):
     else:
         country = df["Country"].iloc[0]
         happiness_rank = df.loc[df["Country"] == country, "Happiness Rank"].iat[0]
-        happiness_score = df.loc[df["Country"] == country, "Happiness Score"].iat[0]
+        happiness_score = round(df.loc[df["Country"] == country, "Happiness Score"].iat[0],2)
     return country, happiness_rank, happiness_score
 
 
@@ -115,8 +115,8 @@ def display_base_map(_geo_data, df, myscale):
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
         country = feature["properties"]['name']
-        feature['properties']['happiness_score'] = df_indexed.loc[country,
-                                                                  'Happiness Score'] if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['happiness_score'] =round(df_indexed.loc[country,
+                                                                  'Happiness Score'],2) if country in list(df_indexed.index) else 'N/A'
         feature['properties']['happiness_rank'] = int(
             df_indexed.loc[country, 'Happiness Rank']) if country in list(df_indexed.index) else 'N/A'
 
