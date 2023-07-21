@@ -1,47 +1,21 @@
 import streamlit as st
 from streamlit_folium import st_folium
-import pandas as pd
 import folium
-import geopandas as gpd
 import altair as alt
 
+from services.load_data_service import load_data
+from services.set_scale_service import get_scale
+from services.filter_data_service import filter_data
+
 APP_TITLE = "World Happiness Data"
-GEOJSON_FILE = "data/countries.geo.json"
-DATA_FILE = "data/data.csv"
-
-
-@st.cache_resource
-def load_data():
-    geo_data = gpd.read_file(GEOJSON_FILE)
-    data = pd.read_csv(DATA_FILE)
-    return geo_data, data
-
-
-@st.cache_data
-def get_scale(df):
-    myscale = (df['Happiness Score'].quantile(
-        (0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1))).tolist()
-    return myscale
-
-
-@st.cache_data
-def filter_data(df, year, region, start, end):
-    filtered_df = df.loc[(df['Year'] == year) &
-                         (df['Happiness Score'] >= start) &
-                         (df['Happiness Score'] <= end)]
-    if region and region != "":
-        filtered_df = filtered_df.loc[filtered_df['Region'] == region]
-        
-    return filtered_df
-
 
 def display_map(year, region, start, end, _geo_data, data):
-    df = filter_data(data, year, region, start, end)
+    df = filter_data(data, year, region, start, end, 'Happiness Score')
     if df.empty:
         st.warning("No data available for the selected filters.")
         return "", "", ""
     
-    myscale = get_scale(df)
+    myscale = get_scale(df, 'Happiness Score')
     map = display_base_map(_geo_data, df, myscale)
     st_map = st_folium(map, width=700, height=450)
     country = ''
@@ -139,34 +113,17 @@ def display_base_map(_geo_data, df, myscale):
 
 def main():
     st.title(APP_TITLE)
+    geo_data, data, regions = load_data()
     col1, col2, col3 = st.columns(3)
     with col1:
         year = st.selectbox('Year', (2021, 2020, 2019, 2018, 2017, 2016, 2015))
     with col2:
-        region = st.selectbox('Region', ("",
-            'Australia and New Zealand',
-                                         'Central Asia',
-                                         'Eastern Asia',
-                                         'Eastern Europe',
-                                         'Latin America and the Caribbean',
-                                         'Melanesia',
-                                         'Micronesia',
-                                         'Northern Africa',
-                                         'Northern America',
-                                         'Northern Europe',
-                                         'Polynesia',
-                                         'South-eastern Asia',
-                                         'Southern Asia',
-                                         'Southern Europe',
-                                         'Sub-Saharan Africa',
-                                         'Western Asia',
-                                         'Western Europe'))
+        region = st.selectbox('Region', regions)
     with col3:
         start, end = st.select_slider('Range',
                                       options=(1, 2, 3, 4, 5, 6, 7, 8),
                                       value=(1, 8))
 
-    geo_data, data = load_data()
     country, happiness_rank, happiness_score = display_map(
         year, region, start, end, geo_data, data)
     col1, col2, col3 = st.columns(3)
@@ -179,7 +136,6 @@ def main():
 
     if country:
         display_past_data(data, country)
-
 
 if __name__ == "__main__":
     main()
