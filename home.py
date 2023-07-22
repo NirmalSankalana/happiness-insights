@@ -13,34 +13,31 @@ def display_map(year, region, start, end, _geo_data, data):
     df = filter_data(data, year, region, start, end, 'Happiness Score')
     if df.empty:
         st.warning("No data available for the selected filters.")
-        return "", "", ""
+        return [], [], []
     
     myscale = get_scale(df, 'Happiness Score')
     map = display_base_map(_geo_data, df, myscale)
     st_map = st_folium(map, width=700, height=450)
-    country = ''
-    happiness_rank = ''
-    happiness_score = ''
-    if st_map['last_active_drawing']:
-        properties = st_map['last_active_drawing']['properties']
-        country = properties.get('name', '')
-        happiness_score = properties.get('happiness_score', '')
-        happiness_rank = properties.get('happiness_rank', '')
-    else:
-        country = df["Country"].iloc[0]
-        happiness_rank = df.loc[df["Country"] == country, "Happiness Rank"].iat[0]
-        happiness_score = round(df.loc[df["Country"] == country, "Happiness Score"].iat[0],2)
-    return country, happiness_rank, happiness_score
 
+    # Manual country selection using multiselect
+    countries = st.multiselect('Select Countries', df['Country'].unique().tolist(), default=[df["Country"].iloc[0]])
+
+    # Filter data for the selected countries
+    selected_data = df[df['Country'].isin(countries)]
+    happiness_ranks = selected_data['Happiness Rank'].tolist()
+    happiness_scores = selected_data['Happiness Score'].tolist()
+
+    return countries, happiness_ranks, happiness_scores
 
 @st.cache_resource
-def display_past_data(df, country):
-    df = df.loc[df["Country"] == country].copy()  # Create a copy of the DataFrame
+def display_past_data(df, countries):
+    df = df[df["Country"].isin(countries)].copy()  # Create a copy of the DataFrame
     df['Year'] = df['Year'].astype(int)
     
     chart = alt.Chart(df).mark_line(point=True).encode(
         x=alt.X('Year:O', axis=alt.Axis(format='d', labelFlush=False)),
         y='Happiness Score',
+        color='Country',
         tooltip=['Year:O', 'Happiness Rank']
     ).properties(
         width=alt.Step(80)  # Adjust the width as needed
@@ -124,18 +121,14 @@ def main():
                                       options=(1, 2, 3, 4, 5, 6, 7, 8),
                                       value=(1, 8))
 
-    country, happiness_rank, happiness_score = display_map(
+    countries, happiness_ranks, happiness_scores = display_map(
         year, region, start, end, geo_data, data)
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Selected Country: ", f"{country}")
-    with col2:
-        st.metric("Happiness Rank: ", f"{happiness_rank}")
-    with col3:
-        st.metric("Happiness Score: ", f"{happiness_score}")
 
-    if country:
-        display_past_data(data, country)
+    if countries:
+        st.metric("Selected Countries: ", ", ".join(countries))
+        st.metric("Happiness Ranks: ", ", ".join(map(str, happiness_ranks)))
+        st.metric("Happiness Scores: ", ", ".join(map(str, happiness_scores)))
+        display_past_data(data, countries)
 
 if __name__ == "__main__":
     main()
