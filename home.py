@@ -7,6 +7,9 @@ from services.load_data_service import load_data
 from services.set_scale_service import get_scale
 from services.filter_data_service import filter_data
 
+# Charts
+from graphs.line_chart import display_past_data
+
 APP_TITLE = "World Happiness Data"
 
 def display_map(year, region, start, end, _geo_data, data):
@@ -28,27 +31,6 @@ def display_map(year, region, start, end, _geo_data, data):
     happiness_scores = selected_data['Happiness Score'].tolist()
 
     return countries, happiness_ranks, happiness_scores
-
-@st.cache_resource
-def display_past_data(df, countries):
-    df = df[df["Country"].isin(countries)].copy()  # Create a copy of the DataFrame
-    df['Year'] = df['Year'].astype(int)
-    
-    chart = alt.Chart(df).mark_line(point=True).encode(
-        x=alt.X('Year:O', axis=alt.Axis(format='d', labelFlush=False)),
-        y='Happiness Score',
-        color='Country',
-        tooltip=['Year:O', 'Happiness Rank']
-    ).properties(
-        width=alt.Step(80)  # Adjust the width as needed
-    ).configure_view(
-        stroke=None
-    ).configure_axis(
-        grid=False
-    )
-    
-    st.altair_chart(chart, use_container_width=True)
-
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale):
@@ -125,10 +107,8 @@ def main():
         year, region, start, end, geo_data, data)
 
     if countries:
-        st.metric("Selected Countries: ", ", ".join(countries))
-        st.metric("Happiness Ranks: ", ", ".join(map(str, happiness_ranks)))
-        st.metric("Happiness Scores: ", ", ".join(map(str, happiness_scores)))
-        display_past_data(data, countries)
+        display_past_data(data, countries, 'Year', 'Happiness Score', 'Country', ['Country', 'Happiness Score', 'Happiness Rank', 'Country'])
+    
 
 if __name__ == "__main__":
     main()
