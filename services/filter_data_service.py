@@ -9,3 +9,4 @@ def filter_data(df, year, region, start, end, entity_name):
         filtered_df = filtered_df.loc[filtered_df['Region'] == region]
         
     return filtered_df
+

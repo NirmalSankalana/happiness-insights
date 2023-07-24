@@ -9,16 +9,17 @@ from services.filter_data_service import filter_data
 
 # Charts
 from graphs.line_chart import display_past_data
+from graphs.scatter_plot import scatterplot
 
-APP_TITLE = "World Happiness Data"
+APP_TITLE = "Human Development Index"
 
 def display_map(year, region, start, end, _geo_data, data):
-    df = filter_data(data, year, region, start, end, 'Happiness Score')
+    df = filter_data(data, year, region, start, end, 'Human Development Index')
     if df.empty:
         st.warning("No data available for the selected filters.")
         return [], [], []
     
-    myscale = get_scale(df, 'Happiness Score')
+    myscale = get_scale(df, 'Human Development Index')
     map = display_base_map(_geo_data, df, myscale)
     st_map = st_folium(map, width=700, height=450)
 
@@ -27,10 +28,10 @@ def display_map(year, region, start, end, _geo_data, data):
 
     # Filter data for the selected countries
     selected_data = df[df['Country'].isin(countries)]
-    happiness_ranks = selected_data['Happiness Rank'].tolist()
-    happiness_scores = selected_data['Happiness Score'].tolist()
+    hdi_ranks = selected_data['Human Development Index Rank'].tolist()
+    hdi_scores = selected_data['Human Development Index'].tolist()
 
-    return countries, happiness_ranks, happiness_scores
+    return countries, hdi_ranks, hdi_scores
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale):
@@ -45,13 +46,13 @@ def display_base_map(_geo_data, df, myscale):
         geo_data=_geo_data,
         name='Choropleth',
         data=df,
-        columns=['Country', 'Happiness Score'],
+        columns=['Country', 'Human Development Index'],
         key_on="feature.properties.name",
         fill_color='YlGnBu',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
-        legend_name='Happiness Score',
+        legend_name='Human Development Index',
         smooth_factor=0
     ).add_to(map)
 
@@ -68,10 +69,10 @@ def display_base_map(_geo_data, df, myscale):
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
         country = feature["properties"]['name']
-        feature['properties']['happiness_score'] =round(df_indexed.loc[country,
-                                                                  'Happiness Score'],2) if country in list(df_indexed.index) else 'N/A'
-        feature['properties']['happiness_rank'] = int(
-            df_indexed.loc[country, 'Happiness Rank']) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['hdi_score'] =round(df_indexed.loc[country,
+                                                                  'Human Development Index'],2) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['hdi_rank'] = int(
+            df_indexed.loc[country, 'Human Development Index Rank']) if country in list(df_indexed.index) else 'N/A'
 
     NIL = folium.features.GeoJson(
         choropleth.geojson.data,
@@ -79,8 +80,8 @@ def display_base_map(_geo_data, df, myscale):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'happiness_rank', 'happiness_score'],
-            aliases=['Country: ', 'Happiness Rank', 'Happiness Score'],
+            fields=['name', 'hdi_score', 'hdi_rank'],
+            aliases=['Country: ', 'Human Development Index Rank', 'Human Development Index'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
         )
@@ -100,15 +101,15 @@ def main():
         region = st.selectbox('Region', regions)
     with col3:
         start, end = st.select_slider('Range',
-                                      options=(1, 2, 3, 4, 5, 6, 7, 8),
-                                      value=(1, 8))
-
+                                      options=(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1),
+                                      value=(0, 1))
+    scatterplot(data, year, region, start, end, 'Human Development Index', 'Happiness Score')
     countries, happiness_ranks, happiness_scores = display_map(
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Happiness Score', 'Country', ['Country', 'Happiness Score', 'Happiness Rank'])
-    
+        display_past_data(data, countries, 'Year', 'Human Development Index', 'Country', ['Country', 'Human Development Index', 'Human Development Index Rank'])
+        
 
 if __name__ == "__main__":
     main()
