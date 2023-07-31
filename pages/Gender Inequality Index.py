@@ -109,7 +109,10 @@ def main():
 
     if countries:
         display_past_data(data, countries, 'Year', 'Gender Inequality Index', 'Country', ['Country', 'Gender Inequality Index', 'Gender Inequality Index Rank'])
-        
+
+        display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
+                              ['Country', 'Happiness Score', 'Happiness Rank'])
+
 
 if __name__ == "__main__":
     main()
