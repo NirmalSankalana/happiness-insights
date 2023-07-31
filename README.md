@@ -12,7 +12,7 @@ How to set up the project.
 
 Run project
 
-1. `streamlit run main.py`
+1. `streamlit run home.py`
 
 Save Dependancies
 
