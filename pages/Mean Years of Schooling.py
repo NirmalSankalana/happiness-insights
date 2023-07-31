@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 from streamlit_folium import st_folium
 import folium
@@ -11,15 +12,16 @@ from services.filter_data_service import filter_data
 from graphs.line_chart import display_past_data
 from graphs.scatter_plot import scatterplot
 
-APP_TITLE = "Gender Inequality Index"
+APP_TITLE = "Mean Years of Schooling"
+
 
 def display_map(year, region, start, end, _geo_data, data):
-    df = filter_data(data, year, region, start, end, 'Gender Inequality Index')
+    df = filter_data(data, year, region, start, end, 'Mean Years of Schooling')
     if df.empty:
         st.warning("No data available for the selected filters.")
         return [], [], []
-    
-    myscale = get_scale(df, 'Gender Inequality Index')
+
+    myscale = get_scale(df, 'Mean Years of Schooling')
     map = display_base_map(_geo_data, df, myscale)
     st_map = st_folium(map, width=700, height=450)
 
@@ -28,10 +30,11 @@ def display_map(year, region, start, end, _geo_data, data):
 
     # Filter data for the selected countries
     selected_data = df[df['Country'].isin(countries)]
-    gii_rank = selected_data['Gender Inequality Index Rank'].tolist()
-    gii_score = selected_data['Gender Inequality Index'].tolist()
+    mys_rank = selected_data['Mean Years of Schooling Rank'].tolist()
+    mys_score = selected_data['Mean Years of Schooling'].tolist()
 
-    return countries, gii_rank, gii_score
+    return countries, mys_rank, mys_score
+
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale):
@@ -46,13 +49,13 @@ def display_base_map(_geo_data, df, myscale):
         geo_data=_geo_data,
         name='Choropleth',
         data=df,
-        columns=['Country', 'Gender Inequality Index'],
+        columns=['Country', 'Mean Years of Schooling'],
         key_on="feature.properties.name",
         fill_color='YlGnBu',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
-        legend_name='Gender Inequality Index',
+        legend_name='Mean Years of Schooling',
         smooth_factor=0
     ).add_to(map)
 
@@ -69,10 +72,10 @@ def display_base_map(_geo_data, df, myscale):
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
         country = feature["properties"]['name']
-        feature['properties']['gii_score'] =round(df_indexed.loc[country,
-                                                                  'Gender Inequality Index'],2) if country in list(df_indexed.index) else 'N/A'
-        feature['properties']['gii_rank'] = int(
-            df_indexed.loc[country, 'Gender Inequality Index Rank']) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['mys_score'] = round(df_indexed.loc[country,
+        'Mean Years of Schooling'], 2) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['mys_rank'] = int(
+            df_indexed.loc[country, 'Mean Years of Schooling Rank']) if country in list(df_indexed.index) else 'N/A'
 
     NIL = folium.features.GeoJson(
         choropleth.geojson.data,
@@ -80,8 +83,8 @@ def display_base_map(_geo_data, df, myscale):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'gii_score', 'gii_rank'],
-            aliases=['Country: ', 'Gender Inequality Index Rank', 'Gender Inequality Index'],
+            fields=['name', 'mys_score', 'mys_rank'],
+            aliases=['Country: ', 'Mean Years of Schooling Rank', 'Mean Years of Schooling'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
         )
@@ -101,17 +104,18 @@ def main():
         region = st.selectbox('Region', regions)
     with col3:
         start, end = st.select_slider('Range',
-                                      options=(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
-                                      value=(0, 0.9))
-    scatterplot(data, year, region, start, end, 'Gender Inequality Index', 'Happiness Score')
+                                      options=pd.Series(list(range(0, 16))),
+                                      value=(0, 15))
+    scatterplot(data, year, region, start, end, 'Mean Years of Schooling', 'Happiness Score')
     countries, happiness_ranks, happiness_scores = display_map(
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Gender Inequality Index', 'Country', ['Country', 'Gender Inequality Index', 'Gender Inequality Index Rank'])
+        display_past_data(data, countries, 'Year', 'Mean Years of Schooling', 'Country',
+                          ['Country', 'Mean Years of Schooling', 'Mean Years of Schooling Rank'])
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                              ['Country', 'Happiness Score', 'Happiness Rank'])
+                          ['Country', 'Happiness Score', 'Happiness Rank'])
 
 
 if __name__ == "__main__":
