@@ -7,7 +7,6 @@ APP_TITLE = "Analysis"
 
 def main():
     st.title(APP_TITLE)
-    st.subheader("Correlation Plot")
     geo_data, data, regions = load_data()
     data = data.drop(columns=['Happiness Rank', 'Corruption Rank', 'Inequality in life expectancy'])
     data = data.iloc[:, 1: 13]
@@ -23,7 +22,7 @@ def main():
     ))
 
     fig.update_layout(
-        title='Correlation Heatmap',
+        title='Realationship between happiness and its factors',
         xaxis_title='Features',
         yaxis_title='Features',
         width=800,  # Adjust the width as per your preference
