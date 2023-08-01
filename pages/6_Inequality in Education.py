@@ -130,7 +130,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'iie_score', 'iie_rank'],
+            fields=['name', 'iie_rank', 'iie_score'],
             aliases=['Country: ', 'Inequality in eduation Rank', 'Inequality in eduation'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")

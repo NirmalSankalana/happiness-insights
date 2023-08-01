@@ -83,10 +83,10 @@ def display_base_map(_geo_data, df, myscale, region=""):
     # x_map = 17.51
     # y_map = 22
     # st.write(st.session_state)
-    map = folium.Map(location=region_focus.get(region),
+    map0 = folium.Map(location=region_focus.get(region),
                      zoom_start=region_zoom.get(region), tiles=None, scrollWheelZoom=False)
     folium.TileLayer('CartoDB positron', name="Light Map",
-                     control=False).add_to(map)
+                     control=False).add_to(map0)
 
     choropleth = folium.Choropleth(
         geo_data=_geo_data,
@@ -100,7 +100,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         line_opacity=0.2,
         legend_name='Happiness Score',
         smooth_factor=0
-    ).add_to(map)
+    ).add_to(map0)
 
     def style_function(x): return {'fillColor': '#ffffff',
                                    'color': '#000000',
@@ -132,9 +132,9 @@ def display_base_map(_geo_data, df, myscale, region=""):
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
         )
     )
-    map.add_child(NIL)
-    map.keep_in_front(NIL)
-    return map
+    map0.add_child(NIL)
+    map0.keep_in_front(NIL)
+    return map0
 
 
 def main():
