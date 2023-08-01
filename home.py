@@ -11,26 +11,32 @@ from services.filter_data_service import filter_data
 from graphs.line_chart import display_past_data
 
 APP_TITLE = "World Happiness Data"
+select_country = list()
 
 def display_map(year, region, start, end, _geo_data, data):
     df = filter_data(data, year, region, start, end, 'Happiness Score')
     if df.empty:
         st.warning("No data available for the selected filters.")
         return [], [], []
-    
+
     myscale = get_scale(df, 'Happiness Score')
     map = display_base_map(_geo_data, df, myscale, region)
     st_map = st_folium(map, width=700, height=450)
 
+    if st_map['last_active_drawing']:
+        properties = st_map['last_active_drawing']['properties']
+        country = properties.get('name')
+        select_country.append(country)
     # Manual country selection using multiselect
     countries = st.multiselect('Select Countries', df['Country'].unique().tolist(), default=[df["Country"].iloc[0]])
 
-    # Filter data for the selected countries
-    selected_data = df[df['Country'].isin(countries)]
+    select_country.extend(countries)
+
+    selected_data = df[df['Country'].isin(select_country)]
     happiness_ranks = selected_data['Happiness Rank'].tolist()
     happiness_scores = selected_data['Happiness Score'].tolist()
 
-    return countries, happiness_ranks, happiness_scores
+    return select_country, happiness_ranks, happiness_scores
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale, region=""):
@@ -109,8 +115,8 @@ def display_base_map(_geo_data, df, myscale, region=""):
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
         country = feature["properties"]['name']
-        feature['properties']['happiness_score'] =round(df_indexed.loc[country,
-                                                                  'Happiness Score'],2) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['happiness_score'] = round(df_indexed.loc[country,
+        'Happiness Score'], 2) if country in list(df_indexed.index) else 'N/A'
         feature['properties']['happiness_rank'] = int(
             df_indexed.loc[country, 'Happiness Rank']) if country in list(df_indexed.index) else 'N/A'
 
@@ -145,13 +151,13 @@ def main():
                                       options=(1, 2, 3, 4, 5, 6, 7, 8),
                                       value=(1, 8))
 
-
     countries, happiness_ranks, happiness_scores = display_map(
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Happiness Score', 'Country', ['Country', 'Happiness Score', 'Happiness Rank'], "Happiness Score from 2015 to 2021")
-    
+        display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
+                          ['Country', 'Happiness Score', 'Happiness Rank'], "Happiness Score from 2015 to 2021")
+
 
 if __name__ == "__main__":
     main()

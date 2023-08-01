@@ -13,6 +13,7 @@ from graphs.line_chart import display_past_data
 from graphs.scatter_plot import scatterplot
 
 APP_TITLE = "Maternal Mortality Ratio"
+select_country = list()
 
 
 def display_map(year, region, start, end, _geo_data, data):
@@ -22,26 +23,72 @@ def display_map(year, region, start, end, _geo_data, data):
         return [], [], []
 
     myscale = get_scale(df, 'Maternal Mortality Ratio (deaths per 100,000 live births)')
-    map = display_base_map(_geo_data, df, myscale)
+    map = display_base_map(_geo_data, df, myscale, region)
     st_map = st_folium(map, width=700, height=450)
 
+    if st_map['last_active_drawing']:
+        properties = st_map['last_active_drawing']['properties']
+        country = properties.get('name')
+        select_country.append(country)
     # Manual country selection using multiselect
     countries = st.multiselect('Select Countries', df['Country'].unique().tolist(), default=[df["Country"].iloc[0]])
 
-    # Filter data for the selected countries
-    selected_data = df[df['Country'].isin(countries)]
+    select_country.extend(countries)
+
+    selected_data = df[df['Country'].isin(select_country)]
     mmr_rank = selected_data['Maternal Mortality Ratio (deaths per 100,000 live births) Rank'].tolist()
     mmr_score = selected_data['Maternal Mortality Ratio (deaths per 100,000 live births)'].tolist()
 
-    return countries, mmr_rank, mmr_score
+    return select_country, mmr_rank, mmr_score
 
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
-def display_base_map(_geo_data, df, myscale):
-    x_map = 17.51
-    y_map = 22
-    map = folium.Map(location=[x_map, y_map],
-                     zoom_start=1, tiles=None, scrollWheelZoom=False)
+def display_base_map(_geo_data, df, myscale, region=""):
+    region_focus = {
+        "": [17.51, 22],
+        'Australia and New Zealand': [-28, 145],
+        'Central Asia': [46, 60],
+        'Eastern Asia': [33, 105],
+        'Eastern Europe': [17.51, 22],
+        'Latin America and the Caribbean': [3, -67],
+        'Melanesia': [17, 22],
+        'Micronesia': [17, 22],
+        'Northern Africa': [31, 12],
+        'Northern America': [51, -115],
+        'Northern Europe': [66, 16],
+        'Polynesia': [17, 22],
+        'South-eastern Asia': [1.8, 114],
+        'Southern Asia': [18, 77],
+        'Southern Europe': [43, 10],
+        'Sub-Saharan Africa': [1, 19],
+        'Western Asia': [32, 39.6],
+        'Western Europe': [48, 6]
+    }
+    region_zoom = {
+        "": 1,
+        'Australia and New Zealand': 2,
+        'Central Asia': 3,
+        'Eastern Asia': 2,
+        'Eastern Europe': 2,
+        'Latin America and the Caribbean': 2,
+        'Melanesia': 2,
+        'Micronesia': 2,
+        'Northern Africa': 3,
+        'Northern America': 2,
+        'Northern Europe': 2,
+        'Polynesia': 2,
+        'South-eastern Asia': 3,
+        'Southern Asia': 3,
+        'Southern Europe': 4,
+        'Sub-Saharan Africa': 3,
+        'Western Asia': 3,
+        'Western Europe': 3
+    }
+    # x_map = 17.51
+    # y_map = 22
+    # st.write(st.session_state)
+    map = folium.Map(location=region_focus.get(region),
+                     zoom_start=region_zoom.get(region), tiles=None, scrollWheelZoom=False)
     folium.TileLayer('CartoDB positron', name="Light Map",
                      control=False).add_to(map)
 
