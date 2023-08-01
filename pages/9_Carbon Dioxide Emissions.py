@@ -12,20 +12,21 @@ from services.filter_data_service import filter_data
 from graphs.line_chart import display_past_data
 from graphs.scatter_plot import scatterplot
 
-APP_TITLE = "Inequality in education"
+APP_TITLE = "Carbon dioxide emissions per capita (production) (tonnes)"
 select_country = list()
 
-
+@st.cache_resource(experimental_allow_widgets=True)
 def display_map(year, region, start, end, _geo_data, data):
-    df = filter_data(data, year, region, start, end, 'Inequality in eduation')
+    df = filter_data(data, year, region, start, end, 'Carbon dioxide emissions per capita (production) (tonnes)')
     if df.empty:
         st.warning("No data available for the selected filters.")
         return [], [], []
-
-    myscale = get_scale(df, 'Inequality in eduation')
+    
+    myscale = get_scale(df, 'Carbon dioxide emissions per capita (production) (tonnes)')
     map = display_base_map(_geo_data, df, myscale, region)
     st_map = st_folium(map, width=700, height=450)
 
+    # Manual country selection using multiselect
     if st_map['last_active_drawing']:
         properties = st_map['last_active_drawing']['properties']
         country = properties.get('name')
@@ -36,11 +37,10 @@ def display_map(year, region, start, end, _geo_data, data):
     select_country.extend(countries)
 
     selected_data = df[df['Country'].isin(select_country)]
-    iie_rank = selected_data['Inequality in eduation Rank'].tolist()
-    iie_score = selected_data['Inequality in eduation'].tolist()
+    cde_rank = selected_data['Carbon dioxide emissions per capita (production) (tonnes) Rank'].tolist()
+    cde_score = selected_data['Carbon dioxide emissions per capita (production) (tonnes)'].tolist()
 
-    return select_country, iie_rank, iie_score
-
+    return select_country, cde_rank, cde_score
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale, region=""):
@@ -96,13 +96,13 @@ def display_base_map(_geo_data, df, myscale, region=""):
         geo_data=_geo_data,
         name='Choropleth',
         data=df,
-        columns=['Country', 'Inequality in eduation'],
+        columns=['Country', 'Carbon dioxide emissions per capita (production) (tonnes)'],
         key_on="feature.properties.name",
-        fill_color='YlGnBu',
+        fill_color='PuBu',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
-        legend_name='Inequality in eduation',
+        legend_name='Carbon dioxide emissions per capita (production) (tonnes)',
         smooth_factor=0
     ).add_to(map)
 
@@ -119,10 +119,10 @@ def display_base_map(_geo_data, df, myscale, region=""):
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
         country = feature["properties"]['name']
-        feature['properties']['iie_score'] = round(df_indexed.loc[country,
-        'Inequality in eduation'], 2) if country in list(df_indexed.index) else 'N/A'
-        feature['properties']['iie_rank'] = int(
-            df_indexed.loc[country, 'Inequality in eduation Rank']) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['cde_score'] =round(df_indexed.loc[country,
+                                                                  'Carbon dioxide emissions per capita (production) (tonnes)'],2) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['cde_rank'] = int(
+            df_indexed.loc[country, 'Carbon dioxide emissions per capita (production) (tonnes) Rank']) if country in list(df_indexed.index) else 'N/A'
 
     NIL = folium.features.GeoJson(
         choropleth.geojson.data,
@@ -130,8 +130,8 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'iie_score', 'iie_rank'],
-            aliases=['Country: ', 'Inequality in eduation Rank', 'Inequality in eduation'],
+            fields=['name', 'cde_rank', 'cde_score'],
+            aliases=['Country: ', 'Carbon dioxide emissions per capita (production) (tonnes) Rank', 'Carbon dioxide emissions per capita (production) (tonnes)'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
         )
@@ -151,18 +151,17 @@ def main():
         region = st.selectbox('Region', regions)
     with col3:
         start, end = st.select_slider('Range',
-                                      options=pd.Series(list(range(0, 60, 5))),
-                                      value=(0, 55))
-    scatterplot(data, year, region, start, end, 'Inequality in eduation', 'Happiness Score')
+                                      options=pd.Series(list(range(0, 50, 5))),
+                                      value=(0, 45))
+    scatterplot(data, year, region, start, end, 'Carbon dioxide emissions per capita (production) (tonnes)', 'Happiness Score')
     countries, happiness_ranks, happiness_scores = display_map(
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Inequality in eduation', 'Country',
-                          ['Country', 'Inequality in eduation', 'Inequality in eduation Rank'], 'Inequality in eduation from 2015 to 2021')
+        display_past_data(data, countries, 'Year', 'Carbon dioxide emissions per capita (production) (tonnes)', 'Country', ['Country', 'Carbon dioxide emissions per capita (production) (tonnes)', 'Carbon dioxide emissions per capita (production) (tonnes) Rank'], 'Carbon dioxide emmission per capita from 2015 to 2021')
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                          ['Country', 'Happiness Score', 'Happiness Rank'], "Happiness Score from 2015 to 2021")
+                              ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
 
 
 if __name__ == "__main__":

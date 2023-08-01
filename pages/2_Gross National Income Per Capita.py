@@ -12,19 +12,20 @@ from services.filter_data_service import filter_data
 from graphs.line_chart import display_past_data
 from graphs.scatter_plot import scatterplot
 
-APP_TITLE = "Maternal Mortality Ratio"
+APP_TITLE = "Gross National Income Per Capita"
 select_country = list()
 
 
 def display_map(year, region, start, end, _geo_data, data):
-    df = filter_data(data, year, region, start, end, 'Maternal Mortality Ratio (deaths per 100,000 live births)')
+    df = filter_data(data, year, region, start, end, 'Gross National Income Per Capita')
     if df.empty:
         st.warning("No data available for the selected filters.")
         return [], [], []
 
-    myscale = get_scale(df, 'Maternal Mortality Ratio (deaths per 100,000 live births)')
+    myscale = get_scale(df, 'Gross National Income Per Capita')
     map = display_base_map(_geo_data, df, myscale, region)
     st_map = st_folium(map, width=700, height=450)
+    st_map.update()
 
     if st_map['last_active_drawing']:
         properties = st_map['last_active_drawing']['properties']
@@ -36,10 +37,10 @@ def display_map(year, region, start, end, _geo_data, data):
     select_country.extend(countries)
 
     selected_data = df[df['Country'].isin(select_country)]
-    mmr_rank = selected_data['Maternal Mortality Ratio (deaths per 100,000 live births) Rank'].tolist()
-    mmr_score = selected_data['Maternal Mortality Ratio (deaths per 100,000 live births)'].tolist()
+    gni_rank = selected_data['Gross National Income Per Capita Rank'].tolist()
+    gni_score = selected_data['Gross National Income Per Capita'].tolist()
 
-    return select_country, mmr_rank, mmr_score
+    return select_country, gni_rank, gni_score
 
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
@@ -96,13 +97,13 @@ def display_base_map(_geo_data, df, myscale, region=""):
         geo_data=_geo_data,
         name='Choropleth',
         data=df,
-        columns=['Country', 'Maternal Mortality Ratio (deaths per 100,000 live births)'],
+        columns=['Country', 'Gross National Income Per Capita'],
         key_on="feature.properties.name",
-        fill_color='YlGnBu',
+        fill_color='OrRd',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
-        legend_name='Maternal Mortality Ratio (deaths per 100,000 live births)',
+        legend_name='Gross National Income Per Capita',
         smooth_factor=0
     ).add_to(map)
 
@@ -119,10 +120,10 @@ def display_base_map(_geo_data, df, myscale, region=""):
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
         country = feature["properties"]['name']
-        feature['properties']['mmr_score'] = round(df_indexed.loc[country,
-        'Maternal Mortality Ratio (deaths per 100,000 live births)'], 2) if country in list(df_indexed.index) else 'N/A'
-        feature['properties']['mmr_rank'] = int(
-            df_indexed.loc[country, 'Maternal Mortality Ratio (deaths per 100,000 live births) Rank']) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['gni_score'] = round(df_indexed.loc[country,
+        'Gross National Income Per Capita'], 2) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['gni_rank'] = int(
+            df_indexed.loc[country, 'Gross National Income Per Capita Rank']) if country in list(df_indexed.index) else 'N/A'
 
     NIL = folium.features.GeoJson(
         choropleth.geojson.data,
@@ -130,8 +131,8 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'mmr_score', 'mmr_rank'],
-            aliases=['Country: ', 'Maternal Mortality Ratio (deaths per 100,000 live births) Rank', 'Maternal Mortality Ratio (deaths per 100,000 live births)'],
+            fields=['name', 'gni_rank', 'gni_score'],
+            aliases=['Country: ', 'Gross National Income Per Capita Rank', 'Gross National Income Per Capita'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
         )
@@ -151,18 +152,18 @@ def main():
         region = st.selectbox('Region', regions)
     with col3:
         start, end = st.select_slider('Range',
-                                      options=pd.Series(list(range(0, 1300, 100))),
-                                      value=(0, 1200))
-    scatterplot(data, year, region, start, end, 'Maternal Mortality Ratio (deaths per 100,000 live births)', 'Happiness Score')
-    countries, happiness_ranks, happiness_scores = display_map(
+                                      options=pd.Series(list(range(0, 96000, 1000))),
+                                      value=(0, 95000))
+    scatterplot(data, year, region, start, end, 'Gross National Income Per Capita', 'Happiness Score')
+    countries, ranks, scores = display_map(
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Maternal Mortality Ratio (deaths per 100,000 live births)', 'Country',
-                          ['Country', 'Maternal Mortality Ratio (deaths per 100,000 live births)', 'Maternal Mortality Ratio (deaths per 100,000 live births) Rank'], 'Maternal Mortality Ratio (deaths per 100,000) from 2015 to 2021')
+        display_past_data(data, countries, 'Year', 'Gross National Income Per Capita', 'Country',
+                          ['Country', 'Gross National Income Per Capita', 'Gross National Income Per Capita Rank'], 'GDP per Capita from 2015 to 2021')
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                          ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness from 2015 to 2021')
+                          ['Country', 'Happiness Score', 'Happiness Rank'], "Happiness Score from 2015 to 2021")
 
 
 if __name__ == "__main__":

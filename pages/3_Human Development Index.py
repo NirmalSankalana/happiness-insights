@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 from streamlit_folium import st_folium
 import folium
@@ -12,20 +11,20 @@ from services.filter_data_service import filter_data
 from graphs.line_chart import display_past_data
 from graphs.scatter_plot import scatterplot
 
-APP_TITLE = "Mean Years of Schooling"
+APP_TITLE = "Human Development Index"
 select_country = list()
 
-
 def display_map(year, region, start, end, _geo_data, data):
-    df = filter_data(data, year, region, start, end, 'Mean Years of Schooling')
+    df = filter_data(data, year, region, start, end, 'Human Development Index')
     if df.empty:
         st.warning("No data available for the selected filters.")
         return [], [], []
-
-    myscale = get_scale(df, 'Mean Years of Schooling')
+    
+    myscale = get_scale(df, 'Human Development Index')
     map = display_base_map(_geo_data, df, myscale, region)
     st_map = st_folium(map, width=700, height=450)
 
+    # Manual country selection using multiselect
     if st_map['last_active_drawing']:
         properties = st_map['last_active_drawing']['properties']
         country = properties.get('name')
@@ -36,11 +35,10 @@ def display_map(year, region, start, end, _geo_data, data):
     select_country.extend(countries)
 
     selected_data = df[df['Country'].isin(select_country)]
-    mys_rank = selected_data['Mean Years of Schooling Rank'].tolist()
-    mys_score = selected_data['Mean Years of Schooling'].tolist()
+    hdi_ranks = selected_data['Human Development Index Rank'].tolist()
+    hdi_scores = selected_data['Human Development Index'].tolist()
 
-    return select_country, mys_rank, mys_score
-
+    return select_country, hdi_ranks, hdi_scores
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale, region=""):
@@ -96,13 +94,13 @@ def display_base_map(_geo_data, df, myscale, region=""):
         geo_data=_geo_data,
         name='Choropleth',
         data=df,
-        columns=['Country', 'Mean Years of Schooling'],
+        columns=['Country', 'Human Development Index'],
         key_on="feature.properties.name",
         fill_color='YlGnBu',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
-        legend_name='Mean Years of Schooling',
+        legend_name='Human Development Index',
         smooth_factor=0
     ).add_to(map)
 
@@ -119,10 +117,10 @@ def display_base_map(_geo_data, df, myscale, region=""):
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
         country = feature["properties"]['name']
-        feature['properties']['mys_score'] = round(df_indexed.loc[country,
-        'Mean Years of Schooling'], 2) if country in list(df_indexed.index) else 'N/A'
-        feature['properties']['mys_rank'] = int(
-            df_indexed.loc[country, 'Mean Years of Schooling Rank']) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['hdi_score'] =round(df_indexed.loc[country,
+                                                                  'Human Development Index'],2) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['hdi_rank'] = int(
+            df_indexed.loc[country, 'Human Development Index Rank']) if country in list(df_indexed.index) else 'N/A'
 
     NIL = folium.features.GeoJson(
         choropleth.geojson.data,
@@ -130,8 +128,8 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'mys_score', 'mys_rank'],
-            aliases=['Country: ', 'Mean Years of Schooling Rank', 'Mean Years of Schooling'],
+            fields=['name', 'hdi_rank', 'hdi_score'],
+            aliases=['Country: ', 'Human Development Index Rank', 'Human Development Index'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
         )
@@ -151,19 +149,16 @@ def main():
         region = st.selectbox('Region', regions)
     with col3:
         start, end = st.select_slider('Range',
-                                      options=pd.Series(list(range(0, 16))),
-                                      value=(0, 15))
-    scatterplot(data, year, region, start, end, 'Mean Years of Schooling', 'Happiness Score')
+                                      options=(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1),
+                                      value=(0, 1))
+    scatterplot(data, year, region, start, end, 'Human Development Index', 'Happiness Score')
     countries, happiness_ranks, happiness_scores = display_map(
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Mean Years of Schooling', 'Country',
-                          ['Country', 'Mean Years of Schooling', 'Mean Years of Schooling Rank'], 'Mean year of Schooling from 2015 to 2021')
-
+        display_past_data(data, countries, 'Year', 'Human Development Index', 'Country', ['Country', 'Human Development Index', 'Human Development Index Rank'], 'Human Development Index from 2015 to 2020')
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                          ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness score from 2015 to 2021')
-
+                              ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
 
 if __name__ == "__main__":
     main()

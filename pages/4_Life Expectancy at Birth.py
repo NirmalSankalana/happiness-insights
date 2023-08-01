@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 from streamlit_folium import st_folium
 import folium
@@ -11,20 +12,21 @@ from services.filter_data_service import filter_data
 from graphs.line_chart import display_past_data
 from graphs.scatter_plot import scatterplot
 
-APP_TITLE = "Human Development Index"
+APP_TITLE = "Life Expectancy at Birth"
 select_country = list()
 
+
 def display_map(year, region, start, end, _geo_data, data):
-    df = filter_data(data, year, region, start, end, 'Human Development Index')
+    df = filter_data(data, year, region, start, end, 'Life Expectancy at Birth')
     if df.empty:
         st.warning("No data available for the selected filters.")
         return [], [], []
-    
-    myscale = get_scale(df, 'Human Development Index')
+
+    myscale = get_scale(df, 'Life Expectancy at Birth')
     map = display_base_map(_geo_data, df, myscale, region)
     st_map = st_folium(map, width=700, height=450)
+    st_map.update()
 
-    # Manual country selection using multiselect
     if st_map['last_active_drawing']:
         properties = st_map['last_active_drawing']['properties']
         country = properties.get('name')
@@ -35,10 +37,11 @@ def display_map(year, region, start, end, _geo_data, data):
     select_country.extend(countries)
 
     selected_data = df[df['Country'].isin(select_country)]
-    hdi_ranks = selected_data['Human Development Index Rank'].tolist()
-    hdi_scores = selected_data['Human Development Index'].tolist()
+    leb_rank = selected_data['Life Expectancy at Birth Rank'].tolist()
+    leb_score = selected_data['Life Expectancy at Birth'].tolist()
 
-    return select_country, hdi_ranks, hdi_scores
+    return select_country, leb_rank, leb_score
+
 
 @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale, region=""):
@@ -94,13 +97,13 @@ def display_base_map(_geo_data, df, myscale, region=""):
         geo_data=_geo_data,
         name='Choropleth',
         data=df,
-        columns=['Country', 'Human Development Index'],
+        columns=['Country', 'Life Expectancy at Birth'],
         key_on="feature.properties.name",
-        fill_color='YlGnBu',
+        fill_color='PuBu',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
-        legend_name='Human Development Index',
+        legend_name='Life Expectancy at Birth',
         smooth_factor=0
     ).add_to(map)
 
@@ -117,10 +120,10 @@ def display_base_map(_geo_data, df, myscale, region=""):
     df_indexed = df.set_index('Country')
     for feature in choropleth.geojson.data['features']:
         country = feature["properties"]['name']
-        feature['properties']['hdi_score'] =round(df_indexed.loc[country,
-                                                                  'Human Development Index'],2) if country in list(df_indexed.index) else 'N/A'
-        feature['properties']['hdi_rank'] = int(
-            df_indexed.loc[country, 'Human Development Index Rank']) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['leb_score'] = round(df_indexed.loc[country,
+        'Life Expectancy at Birth'], 2) if country in list(df_indexed.index) else 'N/A'
+        feature['properties']['leb_rank'] = int(
+            df_indexed.loc[country, 'Life Expectancy at Birth Rank']) if country in list(df_indexed.index) else 'N/A'
 
     NIL = folium.features.GeoJson(
         choropleth.geojson.data,
@@ -128,8 +131,8 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'hdi_score', 'hdi_rank'],
-            aliases=['Country: ', 'Human Development Index Rank', 'Human Development Index'],
+            fields=['name', 'leb_rank', 'leb_score'],
+            aliases=['Country: ', 'Life Expectancy at Birth Rank', 'Life Expectancy at Birth'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
         )
@@ -149,16 +152,19 @@ def main():
         region = st.selectbox('Region', regions)
     with col3:
         start, end = st.select_slider('Range',
-                                      options=(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1),
-                                      value=(0, 1))
-    scatterplot(data, year, region, start, end, 'Human Development Index', 'Happiness Score')
-    countries, happiness_ranks, happiness_scores = display_map(
+                                      options=pd.Series(list(range(40, 100, 5))),
+                                      value=(40, 95))
+    scatterplot(data, year, region, start, end, 'Life Expectancy at Birth', 'Happiness Score')
+    countries, ranks, scores = display_map(
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Human Development Index', 'Country', ['Country', 'Human Development Index', 'Human Development Index Rank'], 'Human Development Index from 2015 to 2020')
+        display_past_data(data, countries, 'Year', 'Life Expectancy at Birth', 'Country',
+                          ['Country', 'Life Expectancy at Birth', 'Life Expectancy at Birth Rank'], "Life Expectancy from 2015 to 2021")
+
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                              ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
+                          ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
+
 
 if __name__ == "__main__":
     main()
