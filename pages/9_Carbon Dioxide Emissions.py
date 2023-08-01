@@ -130,7 +130,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'cde_score', 'cde_rank'],
+            fields=['name', 'cde_rank', 'cde_score'],
             aliases=['Country: ', 'Carbon dioxide emissions per capita (production) (tonnes) Rank', 'Carbon dioxide emissions per capita (production) (tonnes)'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")

@@ -128,7 +128,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'hdi_score', 'hdi_rank'],
+            fields=['name', 'hdi_rank', 'hdi_score'],
             aliases=['Country: ', 'Human Development Index Rank', 'Human Development Index'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")

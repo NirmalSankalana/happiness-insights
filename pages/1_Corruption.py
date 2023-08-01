@@ -131,7 +131,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'corr_score', 'corr_rank'],
+            fields=['name', 'corr_rank', 'corr_score'],
             aliases=['Country: ', 'Corruption Rank', 'Corruption'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")

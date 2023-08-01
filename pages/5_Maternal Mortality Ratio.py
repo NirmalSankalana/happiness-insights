@@ -98,7 +98,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         data=df,
         columns=['Country', 'Maternal Mortality Ratio (deaths per 100,000 live births)'],
         key_on="feature.properties.name",
-        fill_color='YlGnBu',
+        fill_color='YlOrRd',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
@@ -130,7 +130,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'mmr_score', 'mmr_rank'],
+            fields=['name', 'mmr_rank', 'mmr_score'],
             aliases=['Country: ', 'Maternal Mortality Ratio (deaths per 100,000 live births) Rank', 'Maternal Mortality Ratio (deaths per 100,000 live births)'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")

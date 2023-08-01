@@ -99,7 +99,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         data=df,
         columns=['Country', 'Life Expectancy at Birth'],
         key_on="feature.properties.name",
-        fill_color='YlGnBu',
+        fill_color='PuBu',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
@@ -131,7 +131,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
         control=False,
         highlight_function=highlight_function,
         tooltip=folium.features.GeoJsonTooltip(
-            fields=['name', 'leb_score', 'leb_rank'],
+            fields=['name', 'leb_rank', 'leb_score'],
             aliases=['Country: ', 'Life Expectancy at Birth Rank', 'Life Expectancy at Birth'],
             style=(
                 "background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;")
