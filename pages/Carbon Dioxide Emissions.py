@@ -109,10 +109,10 @@ def main():
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Carbon dioxide emissions per capita (production) (tonnes)', 'Country', ['Country', 'Carbon dioxide emissions per capita (production) (tonnes)', 'Carbon dioxide emissions per capita (production) (tonnes) Rank'])
+        display_past_data(data, countries, 'Year', 'Carbon dioxide emissions per capita (production) (tonnes)', 'Country', ['Country', 'Carbon dioxide emissions per capita (production) (tonnes)', 'Carbon dioxide emissions per capita (production) (tonnes) Rank'], 'Carbon dioxide emmission per capita from 2015 to 2021')
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                              ['Country', 'Happiness Score', 'Happiness Rank'])
+                              ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
 
 
 if __name__ == "__main__":

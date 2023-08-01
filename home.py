@@ -93,6 +93,7 @@ def display_base_map(_geo_data, df, myscale):
 def main():
     st.title(APP_TITLE)
     geo_data, data, regions = load_data()
+    st.subheader("The happiness scores of different nations.")
     col1, col2, col3 = st.columns(3)
     with col1:
         year = st.selectbox('Year', (2021, 2020, 2019, 2018, 2017, 2016, 2015))
@@ -103,11 +104,12 @@ def main():
                                       options=(1, 2, 3, 4, 5, 6, 7, 8),
                                       value=(1, 8))
 
+
     countries, happiness_ranks, happiness_scores = display_map(
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Happiness Score', 'Country', ['Country', 'Happiness Score', 'Happiness Rank'])
+        display_past_data(data, countries, 'Year', 'Happiness Score', 'Country', ['Country', 'Happiness Score', 'Happiness Rank'], "Happiness Score from 2015 to 2021")
     
 
 if __name__ == "__main__":

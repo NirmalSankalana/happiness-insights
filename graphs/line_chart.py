@@ -5,7 +5,7 @@ import streamlit as st
 import altair as alt
 
 @st.cache_resource
-def display_past_data(df, countries, x_axis, y_axis, color_channel, tooltip_data:list):
+def display_past_data(df, countries, x_axis, y_axis, color_channel, tooltip_data:list, title):
     df = df[df["Country"].isin(countries)].copy()  # Create a copy of the DataFrame
     df['Year'] = df['Year'].astype(int)
     
@@ -15,6 +15,7 @@ def display_past_data(df, countries, x_axis, y_axis, color_channel, tooltip_data
         color=color_channel,
         tooltip=tooltip_data
     ).properties(
+        title=title,
         width=alt.Step(80)  # Adjust the width as needed
     ).configure_view(
         stroke=None

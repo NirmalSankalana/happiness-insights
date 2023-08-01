@@ -108,8 +108,9 @@ def main():
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Human Development Index', 'Country', ['Country', 'Human Development Index', 'Human Development Index Rank'])
-        
+        display_past_data(data, countries, 'Year', 'Human Development Index', 'Country', ['Country', 'Human Development Index', 'Human Development Index Rank'], 'Human Development Index from 2015 to 2020')
+        display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
+                              ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
 
 if __name__ == "__main__":
     main()
