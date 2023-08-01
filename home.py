@@ -32,7 +32,7 @@ def display_map(year, region, start, end, _geo_data, data):
 
     return countries, happiness_ranks, happiness_scores
 
-# @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
+@st.cache_resource(hash_funcs={folium.Map: lambda _: None})
 def display_base_map(_geo_data, df, myscale, region=""):
     region_focus = {
         "": [17.51, 22],
