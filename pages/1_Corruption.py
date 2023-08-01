@@ -53,7 +53,7 @@ def display_base_map(_geo_data, df, myscale):
         data=df,
         columns=['Country', 'Corruption'],
         key_on="feature.properties.name",
-        fill_color='YlGnBu',
+        fill_color='RdGy',
         threshold_scale=myscale,
         fill_opacity=1,
         line_opacity=0.2,
