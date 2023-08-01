@@ -114,10 +114,10 @@ def main():
 
     if countries:
         display_past_data(data, countries, 'Year', 'Corruption', 'Country',
-                          ['Country', 'Corruption', 'Corruption Rank'])
+                          ['Country', 'Corruption', 'Corruption Rank'], 'Corruption from 2015 to 2021')
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                          ['Country', 'Happiness Score', 'Happiness Rank'])
+                          ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
 
 
 if __name__ == "__main__":

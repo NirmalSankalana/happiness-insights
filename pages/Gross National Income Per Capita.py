@@ -114,10 +114,10 @@ def main():
 
     if countries:
         display_past_data(data, countries, 'Year', 'Gross National Income Per Capita', 'Country',
-                          ['Country', 'Gross National Income Per Capita', 'Gross National Income Per Capita Rank'])
+                          ['Country', 'Gross National Income Per Capita', 'Gross National Income Per Capita Rank'], 'GDP per Capita from 2015 to 2021')
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                          ['Country', 'Happiness Score', 'Happiness Rank'])
+                          ['Country', 'Happiness Score', 'Happiness Rank'], "Happiness Score from 2015 to 2021")
 
 
 if __name__ == "__main__":

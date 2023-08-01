@@ -114,10 +114,10 @@ def main():
 
     if countries:
         display_past_data(data, countries, 'Year', 'Life Expectancy at Birth', 'Country',
-                          ['Country', 'Life Expectancy at Birth', 'Life Expectancy at Birth Rank'])
+                          ['Country', 'Life Expectancy at Birth', 'Life Expectancy at Birth Rank'], "Life Expectancy from 2015 to 2021")
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                          ['Country', 'Happiness Score', 'Happiness Rank'])
+                          ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
 
 
 if __name__ == "__main__":

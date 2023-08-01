@@ -108,10 +108,10 @@ def main():
         year, region, start, end, geo_data, data)
 
     if countries:
-        display_past_data(data, countries, 'Year', 'Gender Inequality Index', 'Country', ['Country', 'Gender Inequality Index', 'Gender Inequality Index Rank'])
+        display_past_data(data, countries, 'Year', 'Gender Inequality Index', 'Country', ['Country', 'Gender Inequality Index', 'Gender Inequality Index Rank'], 'Gender Inequality Index from 2015 to 2021')
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                              ['Country', 'Happiness Score', 'Happiness Rank'])
+                              ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness Score from 2015 to 2021')
 
 
 if __name__ == "__main__":

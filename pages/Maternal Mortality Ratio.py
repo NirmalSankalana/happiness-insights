@@ -112,10 +112,10 @@ def main():
 
     if countries:
         display_past_data(data, countries, 'Year', 'Maternal Mortality Ratio (deaths per 100,000 live births)', 'Country',
-                          ['Country', 'Maternal Mortality Ratio (deaths per 100,000 live births)', 'Maternal Mortality Ratio (deaths per 100,000 live births) Rank'])
+                          ['Country', 'Maternal Mortality Ratio (deaths per 100,000 live births)', 'Maternal Mortality Ratio (deaths per 100,000 live births) Rank'], 'Maternal Mortality Ratio (deaths per 100,000) from 2015 to 2021')
 
         display_past_data(data, countries, 'Year', 'Happiness Score', 'Country',
-                          ['Country', 'Happiness Score', 'Happiness Rank'])
+                          ['Country', 'Happiness Score', 'Happiness Rank'], 'Happiness from 2015 to 2021')
 
 
 if __name__ == "__main__":
