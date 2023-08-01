@@ -19,7 +19,7 @@ def display_map(year, region, start, end, _geo_data, data):
         return [], [], []
     
     myscale = get_scale(df, 'Happiness Score')
-    map = display_base_map(_geo_data, df, myscale)
+    map = display_base_map(_geo_data, df, myscale, region)
     st_map = st_folium(map, width=700, height=450)
 
     # Manual country selection using multiselect
@@ -32,12 +32,53 @@ def display_map(year, region, start, end, _geo_data, data):
 
     return countries, happiness_ranks, happiness_scores
 
-@st.cache_resource(hash_funcs={folium.Map: lambda _: None})
-def display_base_map(_geo_data, df, myscale):
-    x_map = 17.51
-    y_map = 22
-    map = folium.Map(location=[x_map, y_map],
-                     zoom_start=1, tiles=None, scrollWheelZoom=False)
+# @st.cache_resource(hash_funcs={folium.Map: lambda _: None})
+def display_base_map(_geo_data, df, myscale, region=""):
+    region_focus = {
+        "": [17.51, 22],
+        'Australia and New Zealand': [-28, 145],
+        'Central Asia': [46, 60],
+        'Eastern Asia': [33, 105],
+        'Eastern Europe': [17.51, 22],
+        'Latin America and the Caribbean': [3, -67],
+        'Melanesia': [17, 22],
+        'Micronesia': [17, 22],
+        'Northern Africa': [31, 12],
+        'Northern America': [51, -115],
+        'Northern Europe': [66, 16],
+        'Polynesia': [17, 22],
+        'South-eastern Asia': [1.8, 114],
+        'Southern Asia': [18, 77],
+        'Southern Europe': [43, 10],
+        'Sub-Saharan Africa': [1, 19],
+        'Western Asia': [32, 39.6],
+        'Western Europe': [48, 6]
+    }
+    region_zoom = {
+        "": 1,
+        'Australia and New Zealand': 2,
+        'Central Asia': 3,
+        'Eastern Asia': 2,
+        'Eastern Europe': 2,
+        'Latin America and the Caribbean': 2,
+        'Melanesia': 2,
+        'Micronesia': 2,
+        'Northern Africa': 3,
+        'Northern America': 2,
+        'Northern Europe': 2,
+        'Polynesia': 2,
+        'South-eastern Asia': 3,
+        'Southern Asia': 3,
+        'Southern Europe': 4,
+        'Sub-Saharan Africa': 3,
+        'Western Asia': 3,
+        'Western Europe': 3
+    }
+    # x_map = 17.51
+    # y_map = 22
+    # st.write(st.session_state)
+    map = folium.Map(location=region_focus.get(region),
+                     zoom_start=region_zoom.get(region), tiles=None, scrollWheelZoom=False)
     folium.TileLayer('CartoDB positron', name="Light Map",
                      control=False).add_to(map)
 
