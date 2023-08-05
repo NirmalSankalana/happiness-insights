@@ -87,7 +87,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
     # y_map = 22
     # st.write(st.session_state)
     map = folium.Map(location=region_focus.get(region),
-                     zoom_start=region_zoom.get(region), tiles=None, scrollWheelZoom=False)
+                     zoom_start=region_zoom.get(region), tiles=None, scrollWheelZoom=False, max_bounds = True)
     folium.TileLayer('CartoDB positron', name="Light Map",
                      control=False).add_to(map)
 

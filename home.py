@@ -84,7 +84,7 @@ def display_base_map(_geo_data, df, myscale, region=""):
     # y_map = 22
     # st.write(st.session_state)
     map0 = folium.Map(location=region_focus.get(region),
-                     zoom_start=region_zoom.get(region), tiles=None, scrollWheelZoom=False)
+                     zoom_start=region_zoom.get(region), tiles=None, scrollWheelZoom=False, max_bounds = True)
     folium.TileLayer('CartoDB positron', name="Light Map",
                      control=False).add_to(map0)
 
@@ -140,7 +140,6 @@ def display_base_map(_geo_data, df, myscale, region=""):
 def main():
     st.title(APP_TITLE)
     geo_data, data, regions = load_data()
-    st.subheader("The happiness scores of different nations.")
     col1, col2, col3 = st.columns(3)
     with col1:
         year = st.selectbox('Year', (2021, 2020, 2019, 2018, 2017, 2016, 2015))
