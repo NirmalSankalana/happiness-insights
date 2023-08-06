@@ -15,6 +15,7 @@ from graphs.scatter_plot import scatterplot
 APP_TITLE = "Carbon dioxide emissions per capita (production) (tonnes)"
 select_country = list()
 
+@st.cache_resource(experimental_allow_widgets=True)
 def display_map(year, region, start, end, _geo_data, data):
     df = filter_data(data, year, region, start, end, 'Carbon dioxide emissions per capita (production) (tonnes)')
     if df.empty:
